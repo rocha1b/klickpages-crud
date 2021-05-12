@@ -45,24 +45,36 @@ class PageController {
 
   // Create page
   async create(request: Request, response: Response) {
-    const { id, name, url, isPublished, settings_id } = request.body;
+    const { name, url, isPublished, settings_id, tags } = request.body;
 
     const trx = await knex.transaction();
 
     const page = {
-      id,
       name,
       url,
       isPublished,
       settings_id,
+      tags,
     };
 
     const insertedIds = await trx('pages').insert(page);
-    const page_Id = insertedIds[0];
+    const page_id = insertedIds[0];
+
+    const pagesTags = page.tags
+      .split(',')
+      .map((tag: string) => Number(tag.trim()))
+      .map((tag_id: number) => {
+        return {
+          tag_id,
+          page_id
+        }
+      });
+
+    await trx('pages_tags').insert(pagesTags);
 
     await trx.commit();
     return response.json({
-      id: page_Id,
+      id: page_id,
       ...page,
     });
   }  

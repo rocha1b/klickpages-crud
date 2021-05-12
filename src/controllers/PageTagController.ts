@@ -38,12 +38,11 @@ class PageTagController {
 
   // Create page tag
   async create(request: Request, response: Response) {
-    const { id, name } = request.body;
+    const { name } = request.body;
 
     const trx = await knex.transaction();
 
     const pageTag = {
-      id,
       name,
     };
 

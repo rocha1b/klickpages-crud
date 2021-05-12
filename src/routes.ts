@@ -1,6 +1,4 @@
-import express, { request, response } from 'express';
-import { Router } from 'express';
-
+import express from 'express';
 import PageController from './controllers/PageController';
 import PageSettingsController from './controllers/PageSettingsController';
 import PageTagController from './controllers/PageTagController';

@@ -42,12 +42,11 @@ class PageSettingsController {
 
   // Create page settings
   async create(request: Request, response: Response) {
-    const { id, title, description, language } = request.body;
+    const { title, description, language } = request.body;
 
     const trx = await knex.transaction();
 
     const pageSettings = {
-      id,
       title,
       description,
       language,
