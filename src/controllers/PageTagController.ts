@@ -7,10 +7,24 @@ import knex from '../database/connection';
 // }
 
 class PageTagController {
+  // List all tags
+  async index(request: Request, response: Response) {
+    const pageTags = await knex('tags').select('*');
+
+    const serializedPageTags = pageTags.map((pageTags) => {
+      return {
+        id: pageTags.id,
+        name: pageTags.name,
+      };
+    });
+
+    return response.json(serializedPageTags);
+  }  
+  
   // Show page tag
   async show(request: Request, response: Response) {
     const { id } = request.params;
-    const pageTag = await knex('pageTags').where('id', id).first();
+    const pageTag = await knex('tags').where('id', id).first();
     if (!pageTag) {
       return response.status(400).json({ message: "Page tag not found." });
     }
@@ -19,7 +33,7 @@ class PageTagController {
       ...pageTag,
     };
 
-    return response.json({ page: serializedPageTag });
+    return response.json({ tag: serializedPageTag });
   }
 
   // Create page tag
@@ -33,7 +47,7 @@ class PageTagController {
       name,
     };
 
-    const insertedIds = await trx('pageTags').insert(pageTag);
+    const insertedIds = await trx('tags').insert(pageTag);
     const pageTag_Id = insertedIds[0];
 
     await trx.commit();
@@ -43,3 +57,5 @@ class PageTagController {
     });
   }  
 }
+
+export default PageTagController;

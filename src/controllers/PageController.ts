@@ -6,8 +6,8 @@ import knex from '../database/connection';
 //   name: string,
 //   url: string,
 //   isPublished: boolean,
-//   settings: PageConfig,
-//   tags: PageTag[],
+//   settings: settings_id, //PageSettings
+//   //tags: pages_tags
 // }
 
 class PageController {
@@ -21,8 +21,7 @@ class PageController {
         name: page.name,
         url: page.url,
         isPublished: page.isPublished,
-        settings: page.settingsId,
-        tags: page.tags,
+        settings_id: page.settings_id,
       };
     });
 
@@ -46,7 +45,7 @@ class PageController {
 
   // Create page
   async create(request: Request, response: Response) {
-    const { id, name, url, isPublished, settings, tags } = request.body;
+    const { id, name, url, isPublished, settings_id } = request.body;
 
     const trx = await knex.transaction();
 
@@ -55,8 +54,7 @@ class PageController {
       name,
       url,
       isPublished,
-      settings,
-      tags,
+      settings_id,
     };
 
     const insertedIds = await trx('pages').insert(page);

@@ -9,10 +9,26 @@ import knex from '../database/connection';
 // }
 
 class PageSettingsController {
+  // List all settings
+  async index(request: Request, response: Response) {
+    const pageSettings = await knex('page_settings').select('*');
+
+    const serializedPageSettings = pageSettings.map((pageSettings) => {
+      return {
+        id: pageSettings.id,
+        title: pageSettings.title,
+        description: pageSettings.description,
+        language: pageSettings.language,
+      };
+    });
+
+    return response.json(serializedPageSettings);
+  }  
+  
   // Show page settings
   async show(request: Request, response: Response) {
     const { id } = request.params;
-    const pageSettings = await knex('pageSettings').where('id', id).first();
+    const pageSettings = await knex('page_settings').where('id', id).first();
     if (!pageSettings) {
       return response.status(400).json({ message: "Page settings not found." });
     }
@@ -21,7 +37,7 @@ class PageSettingsController {
       ...pageSettings,
     };
 
-    return response.json({ page: serializedPageSettings });
+    return response.json({ page_settings: serializedPageSettings });
   }
 
   // Create page settings
@@ -37,7 +53,7 @@ class PageSettingsController {
       language,
     };
 
-    const insertedIds = await trx('pageSettings').insert(pageSettings);
+    const insertedIds = await trx('page_settings').insert(pageSettings);
     const pageSettings_Id = insertedIds[0];
 
     await trx.commit();
@@ -47,3 +63,5 @@ class PageSettingsController {
     });
   }  
 }
+
+export default PageSettingsController;
