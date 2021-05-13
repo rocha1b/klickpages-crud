@@ -12,6 +12,8 @@ const pageTagController = new PageTagController();
 routes.get('/pages', pageController.index); // list all pages
 routes.get('/pages/:id', pageController.show); // show page
 routes.post('/pages', pageController.create); // create page
+routes.delete('/pages/:id', pageController.delete); // delete page
+routes.put('/pages/:id', pageController.update); // edit page
 
 routes.get('/settings', pageSettingsController.index); // list all settings
 routes.get('/settings/:id', pageSettingsController.show); // show setting

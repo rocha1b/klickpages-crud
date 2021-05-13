@@ -11,6 +11,7 @@ export async function up(knex: Knex) {
       .notNullable()
       .references('id')
       .inTable('page_settings');
+    table.string('tags_id');
   });
 }
 

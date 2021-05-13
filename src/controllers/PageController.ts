@@ -13,7 +13,7 @@ import knex from '../database/connection';
 class PageController {
   // List all pages
   async index(request: Request, response: Response) {
-    const pages = await knex('pages').select('*');
+    const pages = await knex('pages').select('*');   
 
     const serializedPages = pages.map((page) => {
       return {
@@ -22,6 +22,7 @@ class PageController {
         url: page.url,
         isPublished: page.isPublished,
         settings_id: page.settings_id,
+        tags_id: page.tags_id,
       };
     });
 
@@ -36,48 +37,125 @@ class PageController {
       return response.status(400).json({ message: "Page not found." });
     }
 
+    const pageSetting = await knex('page_settings')
+    .where('id', page.settings_id)
+    .first();
+
+    const tags = await knex('tags')
+    .join('pages_tags', 'tags.id', '=', 'pages_tags.tag_id')
+    .where('pages_tags.page_id', id)
+    .select('tags.id', 'tags.name');
+
     const serializedPage = {
-      ...page,
+      id: page.id,
+      name: page.name,
+      url: page.url,
+      isPublished: page.isPublished,
+      pageSetting,
+      tags,
     };
 
     return response.json({ page: serializedPage });
   }
 
   // Create page
-  async create(request: Request, response: Response) {
-    const { name, url, isPublished, settings_id, tags } = request.body;
+	async create(request: Request, response: Response) {
+		const { name, url, isPublished, settings_id, tags_id } = request.body;
+
+		const trx = await knex.transaction();
+
+		const page = {
+			name,
+			url,
+			isPublished,
+			settings_id,
+			tags_id,
+		};
+
+		const insertedIds = await trx('pages').insert(page);
+		const page_id = insertedIds[0];
+
+		const pagesTags = page.tags_id
+			.split(',')
+			.map((tag: string) => Number(tag.trim()))
+			.map((tag_id: number) => {
+				return {
+					tag_id,
+					page_id,
+				};
+			});
+
+		await trx('pages_tags').insert(pagesTags);
+
+		await trx.commit();
+		return response.json({
+			id: page_id,
+			...page,
+		});
+	}
+
+  async delete (request: Request, response: Response) {
+    const { id } = request.params;
+    const page = await knex('pages').where('id', id).first();
+    // const pageName = page.name;
+
+    if (!page) {
+      return response.status(400).json({ message: "Page does not exist." });
+    }
 
     const trx = await knex.transaction();
+    await trx('pages').where('id', id).del();
+    await trx.commit();
 
-    const page = {
-      name,
-      url,
-      isPublished,
-      settings_id,
-      tags,
-    };
+    return response.json({
+      page: page,
+      message: "Page deleted successfuly",
+    });
+  }
 
-    const insertedIds = await trx('pages').insert(page);
-    const page_id = insertedIds[0];
+  async update (request: Request, response: Response) {
+    const { id } = request.params;
+    const { name, url, isPublished, settings_id, tags_id } = request.body;
 
-    const pagesTags = page.tags
-      .split(',')
-      .map((tag: string) => Number(tag.trim()))
-      .map((tag_id: number) => {
-        return {
-          tag_id,
-          page_id
-        }
-      });
+    const page = await knex('pages').where('id', id).first();
+    if (!page) {
+      return response.status(400).json({ message: "Page does not exist." });
+    }
+
+    // const tags = await knex('tags')
+    // .join('pages_tags', 'tags.id', '=', 'pages_tags.tag_id')
+    // .where('pages_tags.page_id', id)
+    // .select('tags.id', 'tags.name');
+    
+    // Reatribuindo valores da page
+    page.name = name;
+    page.url = url;
+    page.isPublished = isPublished;
+    page.settings_id = settings_id;
+    page.tags_id = tags_id;
+    
+    const trx = await knex.transaction();
+    await trx('pages').where('id', id).update(page);
+    await trx('pages_tags').where('page_id', id).del();
+
+    const pagesTags = page.tags_id
+    .split(',')
+    .map((tag: string) => Number(tag.trim()))
+    .map((tag_id: number) => {
+      return {
+        tag_id,
+        page_id: page.id,
+      };
+    });
 
     await trx('pages_tags').insert(pagesTags);
-
     await trx.commit();
+
     return response.json({
-      id: page_id,
-      ...page,
+      page: page,
+      message: "Page updated successfuly",
     });
-  }  
+  }
 }
 
 export default PageController;

@@ -18,6 +18,10 @@ class PageTagController {
       };
     });
 
+    if (serializedPageTags.length === 0) {
+      return response.status(400).json({ message: "There are no page tags." });
+    }
+
     return response.json(serializedPageTags);
   }  
   
@@ -26,7 +30,7 @@ class PageTagController {
     const { id } = request.params;
     const pageTag = await knex('tags').where('id', id).first();
     if (!pageTag) {
-      return response.status(400).json({ message: "Page tag not found." });
+      return response.status(400).json({ message: "Tag not found." });
     }
 
     const serializedPageTag = {

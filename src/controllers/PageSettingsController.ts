@@ -22,6 +22,10 @@ class PageSettingsController {
       };
     });
 
+    if (serializedPageSettings.length === 0) {
+      return response.status(400).json({ message: "There are no page settings." });
+    }
+
     return response.json(serializedPageSettings);
   }  
   
