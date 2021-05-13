@@ -18,9 +18,12 @@ routes.put('/pages/:id', pageController.update); // edit page
 routes.get('/settings', pageSettingsController.index); // list all settings
 routes.get('/settings/:id', pageSettingsController.show); // show setting
 routes.post('/settings', pageSettingsController.create); // create setting
+routes.delete('/settings/:id', pageSettingsController.delete); // delete setting
+routes.put('/settings/:id', pageSettingsController.update); // edit setting
 
 routes.get('/tags', pageTagController.index); // list all tags
 routes.get('/tags/:id', pageTagController.show); // show tag
 routes.post('/tags', pageTagController.create); // create tag
+routes.delete('/tags/:id', pageTagController.delete); // delete tag
 
 export default routes;

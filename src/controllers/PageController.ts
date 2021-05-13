@@ -20,7 +20,7 @@ class PageController {
         id: page.id,
         name: page.name,
         url: page.url,
-        isPublished: page.isPublished,
+        isPublished: page.isPublished == 1 ? "true" : "false",
         settings_id: page.settings_id,
         tags_id: page.tags_id,
       };
@@ -50,7 +50,7 @@ class PageController {
       id: page.id,
       name: page.name,
       url: page.url,
-      isPublished: page.isPublished,
+      isPublished: page.isPublished == 1 ? "true" : "false",
       pageSetting,
       tags,
     };
@@ -94,6 +94,7 @@ class PageController {
 		});
 	}
 
+  // Delete page
   async delete (request: Request, response: Response) {
     const { id } = request.params;
     const page = await knex('pages').where('id', id).first();
@@ -109,10 +110,11 @@ class PageController {
 
     return response.json({
       page: page,
-      message: "Page deleted successfuly",
+      message: "Page deleted successfully",
     });
   }
 
+  // Update page
   async update (request: Request, response: Response) {
     const { id } = request.params;
     const { name, url, isPublished, settings_id, tags_id } = request.body;
@@ -121,11 +123,6 @@ class PageController {
     if (!page) {
       return response.status(400).json({ message: "Page does not exist." });
     }
-
-    // const tags = await knex('tags')
-    // .join('pages_tags', 'tags.id', '=', 'pages_tags.tag_id')
-    // .where('pages_tags.page_id', id)
-    // .select('tags.id', 'tags.name');
     
     // Reatribuindo valores da page
     page.name = name;

@@ -58,7 +58,26 @@ class PageTagController {
       id: pageTag_Id,
       ...pageTag,
     });
-  }  
+  }
+  
+  // Delete tag
+  async delete (request: Request, response: Response) {
+    const { id } = request.params;
+    const tag = await knex('tags').where('id', id).first();
+
+    if (!tag) {
+      return response.status(400).json({ message: "Tag does not exist." });
+    }
+
+    const trx = await knex.transaction();
+    await trx('tags').where('id', id).del();
+    await trx.commit();
+
+    return response.json({
+      tag: tag,
+      message: "Tag deleted successfully",
+    });
+  }
 }
 
 export default PageTagController;

@@ -64,7 +64,52 @@ class PageSettingsController {
       id: pageSettings_Id,
       ...pageSettings,
     });
-  }  
+  }
+  
+  // Delete setting
+  async delete (request: Request, response: Response) {
+    const { id } = request.params;
+    const pageSetting = await knex('page_settings').where('id', id).first();
+
+    if (!pageSetting) {
+      return response.status(400).json({ message: "Page setting does not exist." });
+    }
+
+    const trx = await knex.transaction();
+    await trx('page_settings').where('id', id).del();
+    await trx.commit();
+
+    return response.json({
+      pageSetting: pageSetting,
+      message: "Page setting deleted successfully",
+    });
+  }
+
+  // Update setting
+  async update (request: Request, response: Response) {
+    const { id } = request.params;
+    const { title, description, language } = request.body;
+
+    const pageSetting = await knex('page_settings').where('id', id).first();
+    if (!pageSetting) {
+      return response.status(400).json({ message: "Page setting does not exist." });
+    }
+    
+    // Reatribuindo valores da page setting
+    pageSetting.title = title;
+    pageSetting.description = description;
+    pageSetting.language = language;
+    
+    const trx = await knex.transaction();
+    await trx('page_settings').where('id', id).update(pageSetting);
+
+    await trx.commit();
+
+    return response.json({
+      pageSetting: pageSetting,
+      message: "Page setting updated successfuly",
+    });
+  }
 }
 
 export default PageSettingsController;
