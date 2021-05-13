@@ -26,6 +26,10 @@ class PageController {
       };
     });
 
+    if (serializedPages.length === 0) {
+      return response.status(400).json({ message: "There were no pages found on the database." });
+    }
+
     return response.json(serializedPages);
   }
   
